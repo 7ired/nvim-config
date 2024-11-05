@@ -3,6 +3,8 @@ local Plug = vim.fn['plug#']
 vim.call('plug#begin')
 
 Plug('jiangmiao/auto-pairs')		   -- Matching brackets
+Plug 'nvim-lua/plenary.nvim'
+Plug 'ThePrimeagen/harpoon'
 Plug('hkupty/iron.nvim')		   -- Send to REPL
 Plug('preservim/nerdtree')   		   -- File explorer
 Plug('/tpope/vim-commentary')		   -- Comment out
@@ -41,7 +43,18 @@ vim.api.nvim_set_option("clipboard", "unnamed")
 -- NERDTree toggle mapping
 vim.api.nvim_set_keymap('n', '<leader>n', ':NERDTreeToggle<CR>', { noremap = true, silent = true })
 
+-- remove trailing whitespaces
 vim.api.nvim_set_keymap('n', '<leader>tr', '::%s/\\s\\+$//e<CR>', {noremap = true, silent = true})
+
+-- Add file to Harpoon
+vim.api.nvim_set_keymap("n", "<leader>a", ":lua require('harpoon.mark').add_file()<CR>", { noremap = true, silent = true })
+
+-- Toggle Harpoon menu
+vim.api.nvim_set_keymap("n", "<leader>m", ":lua require('harpoon.ui').toggle_quick_menu()<CR>", { noremap = true, silent = true })
+
+-- Navigate to files
+vim.api.nvim_set_keymap("n", "<leader>1", ":lua require('harpoon.ui').nav_file(1)<CR>", { noremap = true, silent = true })
+vim.api.nvim_set_keymap("n", "<leader>2", ":lua require('harpoon.ui').nav_file(2)<CR>", { noremap = true, silent = true })
 
 -- Line numbers
 vim.wo.relativenumber = true
@@ -53,6 +66,29 @@ vim.g.ale_python_flake8_options = '--max-line-length=100'
 
 -- Requires
 require('plugins.iron')
+local harpoon_mark = require("harpoon.mark")
+local harpoon_ui = require("harpoon.ui")
+
+-- nvim-cmp setup for autocompletion
+local cmp = require'cmp'
+cmp.setup({
+  snippet = {
+    expand = function(args)
+      require('luasnip').lsp_expand(args.body)
+    end,
+  },
+  mapping = {
+    ['<C-d>'] = cmp.mapping.scroll_docs(-4),
+    ['<C-f>'] = cmp.mapping.scroll_docs(4),
+    ['<C-Space>'] = cmp.mapping.complete(),
+    ['<CR>'] = cmp.mapping.confirm({ select = true }),
+  },
+  sources = {
+    { name = 'nvim_lsp' },
+    { name = 'buffer' },
+    { name = 'path' },
+  },
+})
 
 -- theme
 vim.cmd('colorscheme nord')
